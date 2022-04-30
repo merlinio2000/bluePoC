@@ -40,7 +40,7 @@ public class BluePoC {
 
         DiscoveryAgent discoverAgent = localDevice.getDiscoveryAgent();
 
-        var devices = PoCDiscoverer.searchDevicesSynchronous(discoverAgent);
+        // var devices = PoCDiscoverer.searchDevicesSynchronous(discoverAgent);
         /*
         if (devices.containsKey(localDevice.getBluetoothAddress())) {
             System.err.println("GOTUS");
@@ -52,7 +52,7 @@ public class BluePoC {
         var client = new PoCClient();
         final String srvAddr = "A0AFBD29A567";
         final String srvUUID = PoCService.serviceUUID.toString();
-        client.openConnection("btspp://%s:%s".formatted(srvAddr, "1"));
+        client.openConnection("btspp://%s:%s".formatted(srvAddr, srvUUID));
 
         /*
         for (var device : devices.values()) {
