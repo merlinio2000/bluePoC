@@ -1,3 +1,5 @@
+import com.intel.bluetooth.BluetoothConsts;
+
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.ServiceRecord;
@@ -11,8 +13,8 @@ public class PoCService {
 
     //public static final UUID serviceUUID = UUID.fromString("28cfa891-e066-4184-b67e-837a6f310815");
 
-    public static final UUID serviceUUID = new UUID("1234", false);
-    public static final String serviceURL = "btspp://localhost:" +serviceUUID.toString() + ";name=BluePoC;authenticate=false;authorize=false;encrypt=false";
+    public static final UUID serviceUUID = new UUID("0000110100001000800000805f9b34fb", false);
+    public static final String serviceURL = "btspp://localhost:" + serviceUUID.toString() + ";name=BluePoC;authenticate=false;authorize=false;encrypt=false";
 
     public StreamConnection waitForConnection() throws IOException {
         //LocalDevice.getLocalDevice().setDiscoverable(DiscoveryAgent.GIAC);

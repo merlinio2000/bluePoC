@@ -33,10 +33,11 @@ public class BluePoC {
         };
          */
 
+        System.err.println("LOCAL: " + localDevice.getBluetoothAddress());
+        System.err.flush();
+
         //new Thread(() -> startService()).run();
         //startService();
-
-        System.err.println("LOCAL: " + localDevice.getBluetoothAddress());
 
         DiscoveryAgent discoverAgent = localDevice.getDiscoveryAgent();
 
@@ -77,7 +78,7 @@ public class BluePoC {
 
             byte[] received = fromClient.readAllBytes();
 
-            System.out.println("From client: " + received);
+            System.out.println("From client: " + Arrays.toString(received));
         } finally {
             clientConn.close();
         }
