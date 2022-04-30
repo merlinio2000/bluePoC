@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
 public class PoCClient {
 
@@ -18,26 +19,36 @@ public class PoCClient {
         System.out.println("Opened connection to " + address);
 
         // Initializes the streams.
-        OutputStream output = connection.openOutputStream();
-        InputStream inReader = connection.openInputStream();
+        OutputStream toServer = connection.openOutputStream();
+        InputStream fromServer = connection.openInputStream();
 
         Runnable readThread = () -> {
-            //while (inReader != null) {
-                byte[] fromServer = new byte[50];
+            int readCnt = 0;
+            while (readCnt != -1) {
+                byte[] readBytes = new byte[50];
                 try {
-                    inReader.read(fromServer);
+                    readCnt = fromServer.read(readBytes);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                System.out.println("Read from server " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(fromServer)));
-            //}
+                System.out.println("Read from server " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(readBytes)));
+            }
         };
 
         Runnable writeThread = () -> {
                 System.out.println("Responding...");
                 try {
-                    output.write("hello from client".getBytes(StandardCharsets.UTF_8));
-                    output.flush();
+                    toServer.write("hello from client".getBytes(StandardCharsets.UTF_8));
+                    toServer.flush();
+
+                    Scanner input = new Scanner(System.in);
+                    String toSend;
+                    while (!(toSend = input.nextLine()).equals("EXIT")) {
+                        System.out.println("Sending to server:" + toSend);
+                        toServer.write(toSend.getBytes(StandardCharsets.UTF_8));
+                        toServer.flush();
+                    }
+
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

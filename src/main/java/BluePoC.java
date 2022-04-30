@@ -6,10 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
@@ -82,21 +79,38 @@ public class BluePoC {
                 try {
                     toClient.write(text);
                     toClient.flush();
-                    toClient.close();
+
+                    Scanner input = new Scanner(System.in);
+                    String toSend;
+                    while (!(toSend = input.nextLine()).equals("EXIT")) {
+                        System.out.println("Sending to client:" + toSend);
+                        toClient.write(toSend.getBytes(StandardCharsets.UTF_8));
+                        toClient.flush();
+                    }
+
                 } catch (IOException e) {
                     throw new RuntimeException(e);
+                } finally {
+                    try {
+                        toClient.close();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             };
 
             new Thread(writeThread).start();
 
             Runnable readThread = () -> {
-                byte[] received = new byte[50];
-                try {
-                    fromClient.read(received);
-                    System.out.println("From client: " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(received)));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                int readCnt = 0;
+                while (readCnt != -1) {
+                    byte[] received = new byte[50];
+                    try {
+                        fromClient.read(received);
+                        System.out.println("From client: " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(received)));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             };
 
