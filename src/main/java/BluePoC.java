@@ -4,6 +4,7 @@ import javax.microedition.io.StreamConnection;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,7 +54,7 @@ public class BluePoC {
         var client = new PoCClient();
         final String srvAddr = "A0AFBD29A567";
         final String srvUUID = PoCService.serviceUUID.toString();
-        client.openConnection("btspp://%s:%s".formatted(srvAddr, srvUUID));
+        client.openConnection("btspp://%s:%s".formatted(srvAddr, "4"));
 
         /*
         for (var device : devices.values()) {
@@ -69,16 +70,23 @@ public class BluePoC {
         byte[] text = "Blue World".getBytes(StandardCharsets.UTF_8);
 
         StreamConnection clientConn = serviceFactory.waitForConnection();
-
+        System.out.println("Connection opened!");
+        var clientDevice = RemoteDevice.getRemoteDevice(clientConn);
+        if (!clientDevice.isAuthenticated()) {
+            System.err.println("Client not authenticated");
+        }
         try (InputStream fromClient = clientConn.openInputStream();
             OutputStream toClient = clientConn.openOutputStream()) {
 
             toClient.write(text);
             toClient.flush();
+            toClient.close();
 
-            byte[] received = fromClient.readAllBytes();
+            byte[] received = fromClient.readNBytes(50);
 
-            System.out.println("From client: " + Arrays.toString(received));
+            fromClient.close();
+
+            System.out.println("From client: " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(received)));
         } finally {
             clientConn.close();
         }

@@ -1,6 +1,7 @@
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -21,8 +22,8 @@ public class PoCClient {
             InputStream inReader = connection.openInputStream()) {
 
             // Starts the listening service for incoming messages.
-            byte[] fromServer = inReader.readAllBytes();
-            System.out.println("Read from server " + fromServer);
+            byte[] fromServer = inReader.readNBytes(50);
+            System.out.println("Read from server " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(fromServer)));
 
             System.out.println("Responding...");
             output.write("hello from client".getBytes(StandardCharsets.UTF_8));
