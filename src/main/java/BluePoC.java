@@ -75,23 +75,35 @@ public class BluePoC {
         if (!clientDevice.isAuthenticated()) {
             System.err.println("Client not authenticated");
         }
-        try (InputStream fromClient = clientConn.openInputStream();
-            OutputStream toClient = clientConn.openOutputStream()) {
+        InputStream fromClient = clientConn.openInputStream();
+        OutputStream toClient = clientConn.openOutputStream();
+        try {
+            Runnable writeThread = () -> {
+                try {
+                    toClient.write(text);
+                    toClient.flush();
+                    toClient.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            };
 
-            toClient.write(text);
-            toClient.flush();
-            toClient.close();
+            new Thread(writeThread).start();
 
-            byte[] received = fromClient.readNBytes(50);
+            Runnable readThread = () -> {
+                byte[] received = new byte[0];
+                try {
+                    received = fromClient.readNBytes(50);
+                    System.out.println("From client: " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(received)));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            };
 
-            fromClient.close();
+            new Thread(readThread).start();
 
-            System.out.println("From client: " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(received)));
         } finally {
-            clientConn.close();
+            //clientConn.close();
         }
     }
-
-
-
 }

@@ -18,19 +18,36 @@ public class PoCClient {
         System.out.println("Opened connection to " + address);
 
         // Initializes the streams.
-        try (OutputStream output = connection.openOutputStream();
-            InputStream inReader = connection.openInputStream()) {
+        OutputStream output = connection.openOutputStream();
+        InputStream inReader = connection.openInputStream();
 
-            // Starts the listening service for incoming messages.
-            byte[] fromServer = inReader.readNBytes(50);
-            System.out.println("Read from server " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(fromServer)));
+        Runnable readThread = () -> {
+            //while (inReader != null) {
+                byte[] fromServer;
+                try {
+                    fromServer = inReader.readNBytes(50);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("Read from server " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(fromServer)));
+            //}
+        };
 
-            System.out.println("Responding...");
-            output.write("hello from client".getBytes(StandardCharsets.UTF_8));
-            output.flush();
+        Runnable writeThread = () -> {
+                System.out.println("Responding...");
+                try {
+                    output.write("hello from client".getBytes(StandardCharsets.UTF_8));
+                    output.flush();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+        };
 
+        try  {
+            new Thread(readThread).start();
+            new Thread(writeThread).start();
         } finally {
-            connection.close();
+            //connection.close();
         }
     }
 
