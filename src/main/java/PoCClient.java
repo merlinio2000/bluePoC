@@ -23,9 +23,9 @@ public class PoCClient {
 
         Runnable readThread = () -> {
             //while (inReader != null) {
-                byte[] fromServer;
+                byte[] fromServer = new byte[50];
                 try {
-                    fromServer = inReader.readNBytes(50);
+                    inReader.read(fromServer);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

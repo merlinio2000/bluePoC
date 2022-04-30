@@ -91,9 +91,9 @@ public class BluePoC {
             new Thread(writeThread).start();
 
             Runnable readThread = () -> {
-                byte[] received = new byte[0];
+                byte[] received = new byte[50];
                 try {
-                    received = fromClient.readNBytes(50);
+                    fromClient.read(received);
                     System.out.println("From client: " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(received)));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
