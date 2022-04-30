@@ -34,21 +34,31 @@ public class BluePoC {
          */
 
         //new Thread(() -> startService()).run();
+        //startService();
 
         System.err.println("LOCAL: " + localDevice.getBluetoothAddress());
 
         DiscoveryAgent discoverAgent = localDevice.getDiscoveryAgent();
 
         var devices = PoCDiscoverer.searchDevicesSynchronous(discoverAgent);
-
+        /*
         if (devices.containsKey(localDevice.getBluetoothAddress())) {
             System.err.println("GOTUS");
         }
 
+        PoCDiscoverer.searchServicesOnDeviceSynchronous(discoverAgent, devices.get("A0AFBD29A567"));
+        */
+        System.out.println("Attempting to connect...");
+        var client = new PoCClient();
+        final String srvAddr = "A0AFBD29A567";
+        final String srvUUID = PoCService.serviceUUID.toString();
+        client.openConnection("btspp://%s:%s".formatted(srvAddr, "1"));
+
+        /*
         for (var device : devices.values()) {
             PoCDiscoverer.searchServicesOnDeviceSynchronous(discoverAgent, device);
         }
-
+        */
 
     }
 
@@ -59,17 +69,18 @@ public class BluePoC {
 
         StreamConnection clientConn = serviceFactory.waitForConnection();
 
-        InputStream fromClient = clientConn.openInputStream();
-        OutputStream toClient = clientConn.openOutputStream();
+        try (InputStream fromClient = clientConn.openInputStream();
+            OutputStream toClient = clientConn.openOutputStream()) {
 
-        toClient.write(text);
+            toClient.write(text);
+            toClient.flush();
 
-        byte[] received = fromClient.readAllBytes();
+            byte[] received = fromClient.readAllBytes();
 
-        System.out.println(received);
-
-        clientConn.close();
-
+            System.out.println("From client: " + received);
+        } finally {
+            clientConn.close();
+        }
     }
 
 

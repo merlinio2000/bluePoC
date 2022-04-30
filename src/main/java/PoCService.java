@@ -11,7 +11,7 @@ public class PoCService {
     //public static final UUID serviceUUID = UUID.fromString("28cfa891-e066-4184-b67e-837a6f310815");
 
     public static final UUID serviceUUID = new UUID("28cfa891e0664184b67e837a6f310815", false);
-    public static final String serviceURL = "btspp://localhost:" + serviceUUID.toString() + ";name=BluePoC";
+    public static final String serviceURL = "btspp://localhost:1;name=BluePoC";
 
     public StreamConnection waitForConnection() throws IOException {
         //LocalDevice.getLocalDevice().setDiscoverable(DiscoveryAgent.GIAC);

@@ -51,7 +51,7 @@ public class PoCDiscoverer {
 
         try {
             var listener = new PoCListener();
-            agent.searchServices(null, new UUID[]{new UUID(0x1106 /*OBEX_FILE_TRANSFER*/)}, device, listener);
+            agent.searchServices(null, new UUID[]{PoCService.serviceUUID}, device, listener);
 
             while (!listener.isInquiryCompleted()) {
                 conditionInquiryCompleted.await();
@@ -93,6 +93,13 @@ public class PoCDiscoverer {
         @Override
         public void serviceSearchCompleted(int transID, int respCode) {
             System.out.println("SERVICE-SEARCH-COMPL: transID = " + transID + ", respCode = " + respCode);
+            mutex.lock();
+            try {
+                inquiryCompleted.set(true);
+                conditionInquiryCompleted.signal();
+            } finally {
+                mutex.unlock();
+            }
         }
 
         @Override
