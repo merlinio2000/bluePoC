@@ -49,7 +49,7 @@ public class BluePoC {
         */
         System.out.println("Attempting to connect...");
         var client = new PoCClient();
-        final String srvAddr = "A0AFBD29A567";
+        final String srvAddr = "AC824751484C";
         final String srvUUID = PoCService.serviceUUID.toString();
         client.openConnection("btspp://%s:%s".formatted(srvAddr, "4"));
 
@@ -72,52 +72,9 @@ public class BluePoC {
         if (!clientDevice.isAuthenticated()) {
             System.err.println("Client not authenticated");
         }
-        InputStream fromClient = clientConn.openInputStream();
-        OutputStream toClient = clientConn.openOutputStream();
-        try {
-            Runnable writeThread = () -> {
-                try {
-                    toClient.write(text);
-                    toClient.flush();
 
-                    Scanner input = new Scanner(System.in);
-                    String toSend;
-                    while (!(toSend = input.nextLine()).equals("EXIT")) {
-                        System.out.println("Sending to client:" + toSend);
-                        toClient.write(toSend.getBytes(StandardCharsets.UTF_8));
-                        toClient.flush();
-                    }
+        new WriterThread(clientConn).start();
+        new ReadThread(clientConn).start();
 
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    try {
-                        toClient.close();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            };
-
-            new Thread(writeThread).start();
-
-            Runnable readThread = () -> {
-                int readCnt = 0;
-                while (readCnt != -1) {
-                    byte[] received = new byte[50];
-                    try {
-                        fromClient.read(received);
-                        System.out.println("From client: " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(received)));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            };
-
-            new Thread(readThread).start();
-
-        } finally {
-            //clientConn.close();
-        }
     }
 }

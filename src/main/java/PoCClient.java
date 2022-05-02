@@ -18,48 +18,11 @@ public class PoCClient {
 
         System.out.println("Opened connection to " + address);
 
-        // Initializes the streams.
-        OutputStream toServer = connection.openOutputStream();
-        InputStream fromServer = connection.openInputStream();
 
-        Runnable readThread = () -> {
-            int readCnt = 0;
-            while (readCnt != -1) {
-                byte[] readBytes = new byte[50];
-                try {
-                    readCnt = fromServer.read(readBytes);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                System.out.println("Read from server " + StandardCharsets.UTF_8.decode(ByteBuffer.wrap(readBytes)));
-            }
-        };
+        new ReadThread(connection).start();
+        new WriterThread(connection).start();
 
-        Runnable writeThread = () -> {
-                System.out.println("Responding...");
-                try {
-                    toServer.write("hello from client".getBytes(StandardCharsets.UTF_8));
-                    toServer.flush();
-
-                    Scanner input = new Scanner(System.in);
-                    String toSend;
-                    while (!(toSend = input.nextLine()).equals("EXIT")) {
-                        System.out.println("Sending to server:" + toSend);
-                        toServer.write(toSend.getBytes(StandardCharsets.UTF_8));
-                        toServer.flush();
-                    }
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-        };
-
-        try  {
-            new Thread(readThread).start();
-            new Thread(writeThread).start();
-        } finally {
-            //connection.close();
-        }
+        // TODO connection possibly gets leaked
     }
 
 }
